@@ -2,12 +2,12 @@ services:
   app:
     image: laravel-app
     build:
-      context: ../../src          # 👈 PENTING
-      dockerfile: docker/prod/Dockerfile
+      context: ../../src
+      dockerfile: Dockerfile
     container_name: laravel-app
-    restart: unless-stopped
     volumes:
       - ../../src:/var/www
+    restart: unless-stopped
     networks:
       - laravel
 
