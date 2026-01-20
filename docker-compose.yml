@@ -13,12 +13,10 @@ services:
       - appnet
 
   php:
+    container_name: myapp-php
     build:
       context: .
       dockerfile: docker/php/Dockerfile
-    container_name: myapp-php
-    volumes:
-      - .:/app
     expose:
       - "8000"
     networks:
