@@ -1,29 +1,30 @@
 services:
-  app:
-    container_name: myapp-php
+  nginx:
+    image: nginx:alpine
+    container_name: myapp-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx:/etc/nginx/conf.d
+      - ./public:/app/public
+    depends_on:
+      - php
+    networks:
+      - appnet
+
+  php:
     build:
       context: .
       dockerfile: docker/php/Dockerfile
-    restart: unless-stopped
-    networks:
-      - my-stack_my-network
+    container_name: myapp-php
+    volumes:
+      - .:/app
     expose:
       - "8000"
-
-  nginx:
-    container_name: myapp-nginx
-    image: nginx:alpine
-    restart: unless-stopped
-    volumes:
-      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
-      - ./src/public:/var/www/public
-    depends_on:
-      - app
     networks:
-      - my-stack_my-network
-    expose:
-      - "80"
+      - appnet
 
 networks:
-  my-stack_my-network:
-    external: true
+  appnet:
+    driver: bridge
