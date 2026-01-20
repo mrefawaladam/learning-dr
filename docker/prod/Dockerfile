@@ -1,18 +1,19 @@
-FROM php:8.2-fpm
+FROM php:8.3-fpm
 
 RUN apt-get update && apt-get install -y \
-    zip unzip git curl \
-    libpng-dev libonig-dev libxml2-dev \
- && docker-php-ext-install pdo pdo_mysql mbstring bcmath gd
+    nginx git curl unzip libzip-dev \
+    && docker-php-ext-install pdo pdo_mysql zip
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
 
-COPY src/ .
+COPY . .
 
-RUN composer install --no-dev --optimize-autoloader \
- && chown -R www-data:www-data /var/www \
- && chmod -R 775 storage bootstrap/cache
+RUN composer install --no-dev --optimize-autoloader
 
-USER www-data
+COPY docker/prod/nginx.conf /etc/nginx/nginx.conf
+
+RUN chown -R www-data:www-data storage bootstrap/cache
+
+CMD ["sh", "-c", "php-fpm -D && nginx -g 'daemon off;'"]
