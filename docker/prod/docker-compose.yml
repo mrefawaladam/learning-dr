@@ -1,13 +1,29 @@
-
 services:
   app:
-    build:
-      context: ../..
-      dockerfile: docker/prod/Dockerfile
     image: laravel-app
-    container_name: laravel-prod
-    restart: always
+    build:
+      context: ../../src          # 👈 PENTING
+      dockerfile: docker/prod/Dockerfile
+    container_name: laravel-app
+    restart: unless-stopped
+    volumes:
+      - ../../src:/var/www
+    networks:
+      - laravel
+
+  nginx:
+    image: nginx:alpine
+    container_name: laravel-nginx
     ports:
-      - "9000:80"
-    env_file:
-      - .env
+      - "8080:80"
+    volumes:
+      - ../../src:/var/www
+      - ../../nginx/prod.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+    networks:
+      - laravel
+
+networks:
+  laravel:
+    driver: bridge
