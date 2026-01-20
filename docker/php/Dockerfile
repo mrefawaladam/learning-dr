@@ -14,6 +14,7 @@ ENV LOG_CHANNEL=stderr
 # FRANKENPHP WORKER MODE
 # ==============================
 ENV FRANKENPHP_WORKERS=1
+ENV FRANKENPHP_DISABLE_HTTPS=1
 
 # ==============================
 # OPCACHE (SINGLE CPU SAFE)
