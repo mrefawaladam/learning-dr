@@ -1,27 +1,24 @@
 services:
-  nginx:
-    image: nginx:alpine
-    container_name: myapp-nginx
-    expose:
-      - "80"
-    volumes:
-      - ./docker/nginx:/etc/nginx/conf.d
-      - ./public:/app/public
-    depends_on:
-      - php
-    networks:
-      - appnet
-
-  php:
+  app:
+    image: dunglas/frankenphp:1.2-php8.3
     container_name: myapp-php
-    build:
-      context: .
-      dockerfile: docker/php/Dockerfile
-    expose:
-      - "8000"
+    restart: unless-stopped
+
+    volumes:
+      - .:/app
+      - ./docker/php/php.ini:/usr/local/etc/php/conf.d/custom.ini
+
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+
+    # PENTING: jangan expose 80
+    ports:
+      - "127.0.0.1:8080:80"
+
     networks:
-      - appnet
+      - internal
 
 networks:
-  appnet:
+  internal:
     driver: bridge

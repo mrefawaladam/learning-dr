@@ -1,17 +1,15 @@
-{
-    auto_https off
-}
-
-:8000 {
+:80 {
     root * /app/public
-    encode gzip zstd
 
     php_server {
         worker {
             file /app/public/index.php
-            num 8
+            num 4
         }
     }
 
+    encode gzip zstd
     file_server
+
+    auto_https off
 }
