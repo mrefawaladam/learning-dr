@@ -14,22 +14,11 @@ services:
     environment:
       APP_ENV: production
       APP_DEBUG: "false"
-
-      # LARAVEL OCTANE
       OCTANE_SERVER: frankenphp
-
-      # FRANKENPHP WORKER MODE (1 CPU VPS)
       FRANKENPHP_WORKERS: 1
 
-    # INTERNAL HTTP ONLY (dipakai NPM)
     ports:
       - "127.0.0.1:8080:80"
-
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
 
     networks:
       - internal
