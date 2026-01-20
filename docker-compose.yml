@@ -14,8 +14,6 @@ services:
     container_name: myapp-nginx
     image: nginx:alpine
     restart: unless-stopped
-    ports:
-      - "80:80"
     volumes:
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
       - ./src/public:/var/www/public
@@ -23,6 +21,8 @@ services:
       - app
     networks:
       - my-stack_my-network
+    expose:
+      - "80"
 
 networks:
   my-stack_my-network:
