@@ -64,6 +64,6 @@ EXPOSE 8000
 # ==============================
 # START FRANKENPHP (WORKER MODE)
 # ==============================
-CMD ["frankenphp", "run", "--config", "/etc/caddy/Caddyfile"]
+CMD ["frankenphp", "run", "--listen", ":80"]
 
 
