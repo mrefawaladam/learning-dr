@@ -1,6 +1,9 @@
+
 services:
   app:
-    image: dunglas/frankenphp:1.2-php8.3
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
     container_name: myapp-php
     restart: unless-stopped
 
@@ -12,9 +15,21 @@ services:
       APP_ENV: production
       APP_DEBUG: "false"
 
-    # PENTING: jangan expose 80
+      # LARAVEL OCTANE
+      OCTANE_SERVER: frankenphp
+
+      # FRANKENPHP WORKER MODE (1 CPU VPS)
+      FRANKENPHP_WORKERS: 1
+
+    # INTERNAL HTTP ONLY (dipakai NPM)
     ports:
       - "127.0.0.1:8080:80"
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
     networks:
       - internal

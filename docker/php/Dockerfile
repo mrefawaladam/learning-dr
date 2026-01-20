@@ -39,6 +39,8 @@ COPY src /var/www
 # ==============================
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
+RUN docker-php-ext-install opcache
+
 RUN composer install \
     --no-dev \
     --optimize-autoloader \
