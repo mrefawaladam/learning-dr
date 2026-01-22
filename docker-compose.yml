@@ -16,6 +16,7 @@ services:
     volumes:
       - .:/app
       - /app/vendor # PENTING: Jangan timpa vendor dari image dengan folder host yang kosong
+      - /app/bootstrap/cache # PENTING: Gunakan cache bawaan container, jangan dari host yang corrupt/stale
       - caddy_data:/data
       - caddy_config:/config
     networks:
