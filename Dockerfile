@@ -32,11 +32,15 @@ COPY --from=deps /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
 
-# Copy file aplikasi
+# Copy file aplikasi ke dalam container
 COPY . .
 
 # Copy vendor yang sudah diinstall di stage 1
 COPY --from=deps /app/vendor /app/vendor
+# PENTING: Copy juga composer.json/lock yang sudah dimodifikasi (ada Octane) dari stage 1
+# agar sinkron dengan folder vendor.
+COPY --from=deps /app/composer.json /app/composer.json
+COPY --from=deps /app/composer.lock /app/composer.lock
 
 # Re-dump autoload untuk memastikan classmap benar (no-scripts agar tidak trigger artisan)
 RUN composer dump-autoload --optimize --no-dev --classmap-authoritative --no-scripts
