@@ -21,6 +21,7 @@ services:
       - caddy_config:/config
     networks:
       - myapp-net
+      - npm_net # Connect to NPM network
     restart: unless-stopped
 
 volumes:
@@ -30,3 +31,6 @@ volumes:
 networks:
   myapp-net:
     driver: bridge
+  npm_net:
+    external: true
+    name: my-stack_my-network # Nama network external NPM kamu
