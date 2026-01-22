@@ -39,24 +39,20 @@ Ini adalah panduan LENGKAP dari 0 (Clone) sampai Live, menggunakan FrankenPHP + 
 ## 🐳 Langkah 2: Build & Start Container
 
 1.  **Jalankan Container**:
-    Karena ini deployment pertama, gunakan flag `--build` untuk membuat image:
+    Proses ini akan **sekaligus menginstall vendor/library** karena kita menggunakan Multi-stage Build.
     ```bash
     docker compose up -d --build
     ```
+    *Tunggu proses build selesai (agak lama di awal karena download vendor).*
 
-2.  **Install Vendor (Composer)**:
-    Install library PHP tanpa dev dependency untuk production:
-    ```bash
-    docker compose exec app composer install --optimize-autoloader --no-dev
-    ```
-
-3.  **Generate Key & Storage Link**:
+2.  **Generate Key & Storage Link**:
+    Sekarang `composer` sudah tersedia di dalam container (jika butuh manual).
     ```bash
     docker compose exec app php artisan key:generate
     docker compose exec app php artisan storage:link
     ```
 
-4.  **Migrasi Database**:
+3.  **Migrasi Database**:
     ```bash
     docker compose exec app php artisan migrate --force
     ```
@@ -87,12 +83,11 @@ Ini adalah panduan LENGKAP dari 0 (Clone) sampai Live, menggunakan FrankenPHP + 
 ## 🛠️ Langkah 4: Troubleshooting Umum
 
 ### Container Jalan tapi "Empty Reply" saat diakses?
-Cek environment variable di `docker-compose.yml`. Pastikan baris ini ADA:
+Cek environment variable di `docker-compose.yml`. Pastikan baris ini ADA & `host` diset 0.0.0.0:
 ```yaml
 environment:
   - SERVER_NAME=:80
 ```
-Tanpa ini, Caddy di dalam container akan mencoba redirect ke HTTPS sendiri, yang akan bentrok dengan NPM.
 
 ### Update Aplikasi (Maintenance Rutin)
 Setiap ada perubahan kode di Git, jalankan urutan ini:
@@ -101,19 +96,19 @@ Setiap ada perubahan kode di Git, jalankan urutan ini:
 # 1. Tarik kode terbaru
 git pull origin main
 
-# 2. Update dependency (jika ada perubahan di composer.json)
-docker compose exec app composer install --optimize-autoloader --no-dev
+# 2. Rebuild Image (WAJIB jika ada update composer.json atau Dockerfile)
+docker compose up -d --build
 
 # 3. Jalankan migrasi (jika ada perubahan database)
 docker compose exec app php artisan migrate --force
 
-# 4. Reload Octane (WAJIB! Agar kode baru terbaca di memory)
+# 4. Reload Octane (Jika tidak rebuild image)
 docker compose exec app php artisan octane:reload
 ```
 
 ---
 
 ## 📂 Struktur Penting
-- **Dockerfile**: Config build image FrankenPHP.
+- **Dockerfile**: Config Multi-stage build (Builder + Runtime).
 - **docker-compose.yml**: Config service & network.
 - **deployment_guide.md**: File panduan ini.

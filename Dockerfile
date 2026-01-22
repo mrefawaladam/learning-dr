@@ -1,7 +1,24 @@
-# 1. Gunakan image dasar
+# ----------------------------------
+# Stage 1: Build Dependencies
+# ----------------------------------
+FROM composer:lts as deps
+
+WORKDIR /app
+
+# Copy hanya file composer dulu agar cache optimal
+COPY composer.json composer.lock ./
+
+# Install dependensi (no scripts agar tidak error jika class belum ada)
+# PENTING: Kita butuh Octane untuk FrankenPHP mode worker.
+RUN composer require laravel/octane --no-interaction --no-scripts
+RUN composer install --no-dev --no-interaction --prefer-dist --ignore-platform-reqs --no-scripts
+
+# ----------------------------------
+# Stage 2: Final Runtime
+# ----------------------------------
 FROM dunglas/frankenphp:1-php8.3
 
-# 2. Install ekstensi PHP yang dibutuhkan Laravel
+# Install ekstensi PHP (tambahkan 'zip' dan 'intl' jika composer butuh)
 RUN install-php-extensions \
     pcntl \
     pdo_mysql \
@@ -10,18 +27,24 @@ RUN install-php-extensions \
     zip \
     opcache
 
-# 3. Set direktori kerja
+# Copy binary composer dari stage builder (Solusi 'composer not found')
+COPY --from=deps /usr/bin/composer /usr/bin/composer
+
 WORKDIR /app
 
-# 4. Copy file aplikasi (dari folder src)
-COPY src .
+# Copy file aplikasi
+COPY . .
 
-# 5. Set environment variable untuk Worker Mode
+# Copy vendor yang sudah diinstall di stage 1
+COPY --from=deps /app/vendor /app/vendor
+
+# Re-dump autoload untuk memastikan classmap benar (no-scripts agar tidak trigger artisan)
+RUN composer dump-autoload --optimize --no-dev --classmap-authoritative --no-scripts
+
 ENV FRANKENPHP_CONFIG="worker public/index.php"
+ENV SERVER_NAME=":80"
 
-# 6. Expose port
 EXPOSE 80
 EXPOSE 443
 
-# 7. Jalankan server menggunakan Octane
 ENTRYPOINT ["php", "artisan", "octane:frankenphp"]

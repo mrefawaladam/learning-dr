@@ -14,7 +14,7 @@ services:
       - SERVER_NAME=:80
     command: "--port=80 --host=0.0.0.0"
     volumes:
-      - ./src:/app
+      - .:/app
       - caddy_data:/data
       - caddy_config:/config
     networks:
